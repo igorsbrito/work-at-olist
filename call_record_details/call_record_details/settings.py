@@ -31,7 +31,9 @@ THIRD_APPS =[
     'rest_framework.authtoken',
 ]
 
-LOCAL_APPS=[]
+LOCAL_APPS=[
+    'call_record'
+]
 
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_APPS
@@ -95,4 +97,5 @@ USE_L10N = True
 USE_TZ = True
 
 
+STATIC_ROOT = 'static'
 STATIC_URL = '/static/'
