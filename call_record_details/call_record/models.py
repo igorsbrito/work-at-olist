@@ -10,7 +10,7 @@ class Record_model(models.Model):
     ]
 
     type = models.IntegerField(choices=type_call, default=STARTED, verbose_name='Type of the call recored')
-    time = models.DateTimeField(verbose_name='Time of the call record')
+    timestamp = models.DateTimeField(verbose_name='Time of the call record')
     call_id = models.IntegerField(verbose_name='Call identifier')
-    origin_phone_number = models.CharField(max_length=11, verbose_name='Origin phone number', blank=True)
-    destination_phone_number = models.CharField(max_length=11, verbose_name='Destination phone number', blank=True)
+    source = models.CharField(max_length=11, verbose_name='Origin phone number', blank=True)
+    destination = models.CharField(max_length=11, verbose_name='Destination phone number', blank=True)
