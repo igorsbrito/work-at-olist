@@ -32,7 +32,8 @@ THIRD_APPS =[
 ]
 
 LOCAL_APPS=[
-    'call_record'
+    'call_record',
+    'telephone_bill'
 ]
 
 
@@ -88,7 +89,7 @@ DATABASES = {'default': env.db()}
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Fortaleza'
 
 USE_I18N = True
 
