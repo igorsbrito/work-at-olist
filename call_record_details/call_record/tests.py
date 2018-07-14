@@ -10,7 +10,7 @@ class RecordTestCase(TestCase):
         Record_model.objects.create(
             type=0,
             call_id=70,
-            timestamp="2017-12-12T15:07:13Z",
+            timestamp="2016-02-29T12:00:00Z",
             source="99988526423",
             destination="9993468278"
         )
@@ -18,14 +18,14 @@ class RecordTestCase(TestCase):
 
     def test_record_model(self):
         start = Record_model.objects.get(call_id=70,type=0)
-        date = datetime.strptime("2017-12-12T15:07:13Z", "%Y-%m-%dT%H:%M:%SZ")
+        date = datetime.strptime("2016-02-29T12:00:00Z", "%Y-%m-%dT%H:%M:%SZ")
 
         self.assertEqual(start.timestamp.strftime("%Y-%m-%d %H:%M:%S"),date.strftime("%Y-%m-%d %H:%M:%S"))
         self.assertEqual(start.call_id, 70)
         self.assertEqual(start.source,"99988526423")
         self.assertEqual(start.destination,"9993468278")
 
-    def teste_call_record_create(self):
+    def test_call_record_create(self):
         data ={
             'call_id':70,
             'type':1,
