@@ -35,15 +35,32 @@ class TelephoneBillTestCase(TestCase):
         call_start3 = datetime.strptime("2017-12-12T21:57:13Z", "%Y-%m-%dT%H:%M:%SZ")
         call_end3 = datetime.strptime("2017-12-13T22:10:56Z", "%Y-%m-%dT%H:%M:%SZ")
 
+        call_start4 = datetime.strptime("2017-12-12T15:07:58Z","%Y-%m-%dT%H:%M:%SZ")
+        call_end4 = datetime.strptime("2017-12-12T15:12:56Z", "%Y-%m-%dT%H:%M:%SZ" )
+
         telephoneCallBillViewSet = TelephoneCallBillViewSet()
 
         data1 = telephoneCallBillViewSet.get_paid_minutes(call_start1, call_end1)
         data2 = telephoneCallBillViewSet.get_paid_minutes(call_start2, call_end2)
         data3 = telephoneCallBillViewSet.get_paid_minutes(call_start3, call_end3)
+        date4 = telephoneCallBillViewSet.get_paid_minutes(call_start4, call_end4)
 
         self.assertEqual(data1['minutes_standard'], 120)
         self.assertEqual(data2['minutes_standard'], 480)
         self.assertEqual(data3['minutes_standard'], 962)
+        self.assertEqual(date4['minutes_standard'], 4)
+
+
+    def test_build_call_price(self):
+        call_start = datetime.strptime("2017-12-12T21:57:13Z", "%Y-%m-%dT%H:%M:%SZ")
+        call_end = datetime.strptime("2017-12-13T22:10:56Z", "%Y-%m-%dT%H:%M:%SZ")
+
+        telephoneCallBillViewSet = TelephoneCallBillViewSet()
+
+        price = telephoneCallBillViewSet.build_call_price(call_start, call_end)
+
+        self.assertEqual(price, 86.94)
+
 
 
     def test_create_telephone_bill(self):
@@ -55,5 +72,4 @@ class TelephoneBillTestCase(TestCase):
         telephoneBill = Telephone_bill_call_model.objects.filter(call_id=70)
 
         self.assertEqual(float(telephoneBill[0].call_price), 0.54)
-
 

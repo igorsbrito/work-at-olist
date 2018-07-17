@@ -194,4 +194,4 @@ class TelephoneCallBillViewSet(viewsets.ModelViewSet):
                 duration_standard = total_duration - duration_reduce
 
 
-        return { 'minutes_standard': duration_standard.seconds//60 + duration_standard.days*1440, 'minutes_reduce':duration_reduce.seconds//60 + (duration_standard.seconds//60)%60 + duration_reduce.days*1440}
+        return { 'minutes_standard': duration_standard.seconds//60 + duration_standard.days*1440, 'minutes_reduce':duration_reduce.seconds//60 + duration_reduce.days*1440}
