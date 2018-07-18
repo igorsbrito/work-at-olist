@@ -1,9 +1,10 @@
 from rest_framework import viewsets, status
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.decorators import list_route, action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from call_record.views import Record_model
+from call_record.models import Record_model
 from .models import Telephone_bill_call_model
 from .serializer import Telephone_bill_call_serializer
 
@@ -20,6 +21,24 @@ class TelephoneCallBillViewSet(viewsets.ModelViewSet):
     START_STANDARD_HOUR = 6
     END_STANDARD_HOUR = 22
 
+    @list_route(methods=['POST'])
+    def get_telehephone_bill(self, request):
+        period = request.data['period']
+
+        month, year = period.split("/")
+
+        telephone_bills = Telephone_bill_call_model.objects.filter(call_end__month=int(month), call_end__year=int(year))
+
+        total_price = 0.0
+
+        for bill in telephone_bills:
+            total_price = total_price + float(bill.call_price)
+
+        telephone_bill_serialized = self.serializer_class(telephone_bills, many=True)
+
+        return Response({'total_price':total_price, 'call_bills':telephone_bill_serialized.data}, status=status.HTTP_200_OK)
+
+    # creation of telephone call bill
     def create_telephone_bill(self, call_id):
 
         data = self.build_call_bill_data(call_id)
@@ -33,7 +52,7 @@ class TelephoneCallBillViewSet(viewsets.ModelViewSet):
                                                                  call_start=data['call_start'],
                                                                  call_end=data['call_end'],
                                                                  call_duration=data['call_duration'])
-
+    # calculate the price of the call
     def build_call_price(self, call_start, call_end):
 
         base_chrage = 0.36
@@ -49,7 +68,7 @@ class TelephoneCallBillViewSet(viewsets.ModelViewSet):
 
         return total_price
 
-
+    # calculate the data of the new telephone call bill
     def build_call_bill_data(self, call_id):
 
         start_call = Record_model.objects.get(call_id=call_id, type=0)
@@ -76,7 +95,7 @@ class TelephoneCallBillViewSet(viewsets.ModelViewSet):
     def reduce_hour(self, hour):
         return (self.START_STANDARD_HOUR > hour or self.END_STANDARD_HOUR <= hour)
 
-
+    # get the minutes of standart and recuce call minutes
     def get_paid_minutes(self, call_start, call_end):
         start_hour = call_start.hour
         end_hour = call_end.hour
@@ -103,7 +122,7 @@ class TelephoneCallBillViewSet(viewsets.ModelViewSet):
             # the call start between 22 and 6 and end between 6 and 22
             elif self.reduce_hour(start_hour) and self.standard_hour(end_hour):
                 hour_to_end = end_hour - self.START_STANDARD_HOUR
-                date_aux = datetime.datetime(call_end.year, call_end.month, call_end.day, 6, 00)
+                date_aux = datetime.datetime(call_end.year, call_end.month, call_end.day, 6, 00, tzinfo=call_end.tzinfo)
 
                 duration_reduce = date_aux - call_start
                 duration_standard = total_duration - duration_reduce
@@ -118,8 +137,8 @@ class TelephoneCallBillViewSet(viewsets.ModelViewSet):
                     duration_reduce = call_end - call_start
 
                 else:
-                    date_aux_start = datetime.datetime(call_start.year, call_start.month, call_start.day, 6, 00)
-                    date_aux_end = datetime.datetime(call_end.year, call_end.month, call_end.day, 22, 00)
+                    date_aux_start = datetime.datetime(call_start.year, call_start.month, call_start.day, 6, 00, tzinfo=call_start.tzinfo )
+                    date_aux_end = datetime.datetime(call_end.year, call_end.month, call_end.day, 22, 00, tzinfo=call_end.tzinfo)
 
                     duration_standard = datetime.timedelta(hours=16, minutes=0, seconds=0, milliseconds=0)
                     duration_reduce = (date_aux_start - call_start) + (call_end - date_aux_end)
@@ -146,9 +165,9 @@ class TelephoneCallBillViewSet(viewsets.ModelViewSet):
                 # 22 hour of the day that the call ended
 
                 if end_hour < 6:
-                    date_aux = datetime.datetime(call_end.year, call_end.month, call_end.day, 22, 00)- datetime.timedelta(days=1)
+                    date_aux = datetime.datetime(call_end.year, call_end.month, call_end.day, 22, 00, tzinfo=call_end.tzinfo)- datetime.timedelta(days=1)
                 else:
-                    date_aux = datetime.datetime(call_end.year, call_end.month, call_end.day, 22, 00)
+                    date_aux = datetime.datetime(call_end.year, call_end.month, call_end.day, 22, 00, tzinfo=call_end.tzinfo)
 
 
                 # this is the duration between 22 hour and the time that the call end
@@ -163,9 +182,9 @@ class TelephoneCallBillViewSet(viewsets.ModelViewSet):
 
                 # 22 hour of the day that the call ended
                 if start_hour < 6:
-                    date_aux = datetime.datetime(call_start.year, call_start.month, call_start.day, 6, 00)
+                    date_aux = datetime.datetime(call_start.year, call_start.month, call_start.day, 6, 00, tzinfo=call_start.tzinfo)
                 else:
-                    date_aux = datetime.datetime(call_start.year, call_start.month, call_start.day, 6, 00) + datetime.timedelta(days=1)
+                    date_aux = datetime.datetime(call_start.year, call_start.month, call_start.day, 6, 00, tzinfo=call_start.tzinfo) + datetime.timedelta(days=1)
 
                 # this is the duration between  the hour the call start and 6
                 duration_recude_hours = date_aux  - call_start
@@ -178,14 +197,14 @@ class TelephoneCallBillViewSet(viewsets.ModelViewSet):
                 days = floor(total_hours / 24)
 
                 if start_hour < 6:
-                    date_aux_start = datetime.datetime(call_start.year, call_start.month, call_start.day, 6, 00)
+                    date_aux_start = datetime.datetime(call_start.year, call_start.month, call_start.day, 6, 00, tzinfo=call_start.tzinfo)
                 else:
-                    date_aux_start = datetime.datetime(call_start.year, call_start.month, call_start.day, 6, 00) + datetime.timedelta(days=1)
+                    date_aux_start = datetime.datetime(call_start.year, call_start.month, call_start.day, 6, 00, tzinfo=call_start.tzinfo) + datetime.timedelta(days=1)
 
                 if end_hour < 6:
-                    date_aux_end = datetime.datetime(call_end.year, call_end.month, call_end.day, 22, 00) - datetime.timedelta(days=1)
+                    date_aux_end = datetime.datetime(call_end.year, call_end.month, call_end.day, 22, 00, tzinfo=call_end.tzinfo) - datetime.timedelta(days=1)
                 else:
-                    date_aux_end = datetime.datetime(call_end.year, call_end.month, call_end.day, 22, 00)
+                    date_aux_end = datetime.datetime(call_end.year, call_end.month, call_end.day, 22, 00, tzinfo=call_end.tzinfo)
 
                 duration_recude_hours_start = date_aux_start - call_start
                 duration_reduce_hours_end = call_end - date_aux_end
@@ -195,3 +214,5 @@ class TelephoneCallBillViewSet(viewsets.ModelViewSet):
 
 
         return { 'minutes_standard': duration_standard.seconds//60 + duration_standard.days*1440, 'minutes_reduce':duration_reduce.seconds//60 + duration_reduce.days*1440}
+
+
