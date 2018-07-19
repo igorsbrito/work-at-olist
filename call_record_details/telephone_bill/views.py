@@ -23,11 +23,18 @@ class TelephoneCallBillViewSet(viewsets.ModelViewSet):
 
     @list_route(methods=['POST'])
     def get_telehephone_bill(self, request):
-        period = request.data['period']
 
-        month, year = period.split("/")
+        number = request.data['number']
 
-        telephone_bills = Telephone_bill_call_model.objects.filter(call_end__month=int(month), call_end__year=int(year))
+        if 'period' in request.data:
+            period = request.data['period']
+            month, year = period.split("/")
+        else:
+            date = datetime.datetime.now()
+            month = date.month
+            year = date.year
+
+        telephone_bills = Telephone_bill_call_model.objects.filter(call_end__month=int(month), call_end__year=int(year), source=number )
 
         total_price = 0.0
 
