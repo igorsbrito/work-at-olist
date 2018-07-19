@@ -6,11 +6,12 @@ from datetime import datetime
 class RecordTestCase(TestCase):
 
     def setUp(self):
+        date = datetime.strptime("2016-02-29T12:00:00Z", "%Y-%m-%dT%H:%M:%SZ")
 
         Record_model.objects.create(
             type=0,
             call_id=70,
-            timestamp="2016-02-29T12:00:00Z",
+            timestamp=date,
             source="99988526423",
             destination="9993468278"
         )

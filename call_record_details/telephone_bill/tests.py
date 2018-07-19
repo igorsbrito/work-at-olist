@@ -11,10 +11,13 @@ from datetime import datetime
 class TelephoneBillTestCase(TestCase):
 
     def setUp(self):
+        call_start_date = datetime.strptime("2016-02-29T21:57:13Z", "%Y-%m-%dT%H:%M:%SZ")
+        call_end_date = datetime.strptime("2016-02-29T22:10:56Z", "%Y-%m-%dT%H:%M:%SZ")
+
         Record_model.objects.create(
             type=0,
             call_id=70,
-            timestamp="2016-02-29T21:57:13Z",
+            timestamp=call_start_date,
             source="99988526423",
             destination="9993468278"
         )
@@ -22,7 +25,7 @@ class TelephoneBillTestCase(TestCase):
         Record_model.objects.create(
             type=1,
             call_id=70,
-            timestamp="2016-02-29T22:10:56Z",
+            timestamp=call_end_date,
         )
 
     def test_paid_minutes(self):
