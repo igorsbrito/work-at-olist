@@ -24,26 +24,30 @@ class TelephoneCallBillViewSet(viewsets.ModelViewSet):
     @list_route(methods=['POST'])
     def get_telehephone_bill(self, request):
 
-        number = request.data['number']
+        try:
+            number = request.data['number']
 
-        if 'period' in request.data:
-            period = request.data['period']
-            month, year = period.split("/")
-        else:
-            date = datetime.datetime.now()
-            month = date.month
-            year = date.year
+            if 'period' in request.data:
+                period = request.data['period']
+                month, year = period.split("/")
+            else:
+                date = datetime.datetime.now()
+                month = date.month
+                year = date.year
 
-        telephone_bills = Telephone_bill_call_model.objects.filter(call_end__month=int(month), call_end__year=int(year), source=number )
+            telephone_bills = Telephone_bill_call_model.objects.filter(call_end__month=int(month), call_end__year=int(year), source=number )
 
-        total_price = 0.0
+            total_price = 0.0
 
-        for bill in telephone_bills:
-            total_price = total_price + float(bill.call_price)
+            for bill in telephone_bills:
+                total_price = total_price + float(bill.call_price)
 
-        telephone_bill_serialized = self.serializer_class(telephone_bills, many=True)
+            telephone_bill_serialized = self.serializer_class(telephone_bills, many=True)
 
-        return Response({'total_price':total_price, 'call_bills':telephone_bill_serialized.data}, status=status.HTTP_200_OK)
+            return Response({'total_price':total_price, 'call_bills':telephone_bill_serialized.data}, status=status.HTTP_200_OK)
+
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     # creation of telephone call bill
     def create_telephone_bill(self, call_id):
